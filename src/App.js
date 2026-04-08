@@ -210,9 +210,9 @@ export default function NoorApp() {
   useEffect(()=>{
     if(!showSplash)return;
     const t1=setTimeout(()=>setSplashPhase(1),2200);
-    const t2=setTimeout(()=>setSplashPhase(2),6500);
-    const t3=setTimeout(()=>setSplashPhase(3),10000);
-    const t4=setTimeout(()=>setShowSplash(false),11000);
+    const t2=setTimeout(()=>setSplashPhase(2),8000);
+    const t3=setTimeout(()=>setSplashPhase(3),12000);
+    const t4=setTimeout(()=>setShowSplash(false),13000);
     return()=>{clearTimeout(t1);clearTimeout(t2);clearTimeout(t3);clearTimeout(t4)};
   },[showSplash]);
 
@@ -283,7 +283,13 @@ export default function NoorApp() {
 
   const loadMood=async(mood)=>{setMoodMode(mood);setMoodLd(true);setMoodVerses([]);setTab("mood");try{const ps=MOODS[mood].verses.map(v=>fetch(`${API}/ayah/${v}/editions/quran-uthmani,en.sahih`).then(r=>r.json()));const rs=await Promise.all(ps);setMoodVerses(rs.filter(r=>r.code===200).map(r=>({ar:r.data[0].text,tr:r.data[1].text,ref:`${r.data[0].surah.englishName} ${r.data[0].numberInSurah}`,gn:r.data[0].number,num:r.data[0].numberInSurah})))}catch{}setMoodLd(false)};
 
-  const aiExplore=async()=>{if(!aiQuery.trim())return;setAiLd(true);setAiResults(null);try{const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:'You are a Quran verse finder. Return ONLY a JSON array: [{"surah":number,"ayah":number,"text":"brief translation","relevance":"why relevant"}]. 6-8 verses. No markdown.',messages:[{role:"user",content:`Find Quran verses about: ${aiQuery}`}]})});const d=await r.json();const tx=d.content?.[0]?.text||"";setAiResults(JSON.parse(tx.replace(/```json|```/g,"").trim()))}catch{setAiResults([{surah:2,ayah:286,text:"Allah does not burden a soul beyond what it can bear",relevance:"Comfort in difficulty"},{surah:94,ayah:5,text:"For indeed, with hardship will be ease",relevance:"Promise of relief after struggle"},{surah:3,ayah:139,text:"Do not weaken and do not grieve, for you are superior if you are believers",relevance:"Strength through faith"},{surah:13,ayah:28,text:"Verily, in the remembrance of Allah do hearts find rest",relevance:"Peace through dhikr"},{surah:65,ayah:3,text:"Whoever relies upon Allah, He is sufficient for him",relevance:"Trust in Allah's plan"},{surah:39,ayah:53,text:"Do not despair of the mercy of Allah",relevance:"Allah's mercy encompasses all"},{surah:2,ayah:155,text:"We will surely test you with fear, hunger, and loss of wealth and lives and fruits",relevance:"Tests are part of life"},{surah:29,ayah:69,text:"Those who strive for Us, We will surely guide them to Our ways",relevance:"Effort brings guidance"}])}setAiLd(false)};
+  const AI_FALLBACK={
+    "Patience":[{surah:2,ayah:153,text:"O you who believe, seek help through patience and prayer",relevance:"Foundation of patience"},{surah:3,ayah:200,text:"O you who believe! Be patient and excel in patience",relevance:"Excellence through patience"},{surah:16,ayah:127,text:"Be patient - and your patience is only through Allah",relevance:"Divine source of patience"},{surah:39,ayah:10,text:"The patient will be given their reward without account",relevance:"Unlimited reward"},{surah:11,ayah:115,text:"And be patient, for indeed Allah does not allow to be lost the reward of those who do good",relevance:"Patience preserves reward"},{surah:46,ayah:35,text:"So be patient as were those of determination among the messengers",relevance:"Prophetic patience"}],
+    "Allah's Mercy":[{surah:39,ayah:53,text:"Do not despair of the mercy of Allah. Indeed, Allah forgives all sins",relevance:"Infinite forgiveness"},{surah:7,ayah:156,text:"My mercy encompasses all things",relevance:"All-encompassing mercy"},{surah:6,ayah:54,text:"Your Lord has decreed upon Himself mercy",relevance:"Self-decreed mercy"},{surah:21,ayah:107,text:"We have not sent you except as a mercy to the worlds",relevance:"Prophet as mercy"},{surah:12,ayah:87,text:"No one despairs of relief from Allah except the disbelieving people",relevance:"Hope in Allah"},{surah:15,ayah:49,text:"Inform My servants that it is I who am the Forgiving, the Merciful",relevance:"Divine introduction"}],
+    "Paradise":[{surah:3,ayah:133,text:"Hasten to forgiveness from your Lord and a garden as wide as the heavens and earth",relevance:"Racing to Paradise"},{surah:56,ayah:89,text:"Rest, bounty, and a Garden of Pleasure",relevance:"Rewards described"},{surah:55,ayah:46,text:"For he who feared standing before his Lord are two gardens",relevance:"Two gardens for the fearful"},{surah:9,ayah:72,text:"Allah has promised the believing men and believing women gardens beneath which rivers flow",relevance:"Promise to believers"},{surah:13,ayah:35,text:"The example of Paradise: beneath it rivers flow, its fruit is lasting and its shade",relevance:"Paradise described"},{surah:47,ayah:15,text:"In it are rivers of water unaltered, rivers of milk, rivers of wine, rivers of purified honey",relevance:"Rivers of Paradise"}],
+    "default":[{surah:2,ayah:286,text:"Allah does not burden a soul beyond what it can bear",relevance:"Comfort in difficulty"},{surah:94,ayah:5,text:"For indeed, with hardship will be ease",relevance:"Promise of relief"},{surah:3,ayah:139,text:"Do not weaken and do not grieve",relevance:"Strength through faith"},{surah:13,ayah:28,text:"Verily, in the remembrance of Allah do hearts find rest",relevance:"Peace through dhikr"},{surah:65,ayah:3,text:"Whoever relies upon Allah, He is sufficient for him",relevance:"Trust in Allah"},{surah:39,ayah:53,text:"Do not despair of the mercy of Allah",relevance:"Allah's mercy encompasses all"}],
+  };
+  const aiExplore=async()=>{if(!aiQuery.trim())return;setAiLd(true);setAiResults(null);try{const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:'You are a Quran verse finder. Return ONLY a JSON array: [{"surah":number,"ayah":number,"text":"brief translation","relevance":"why relevant"}]. 6-8 verses. No markdown.',messages:[{role:"user",content:`Find Quran verses about: ${aiQuery}`}]})});const d=await r.json();const tx=d.content?.[0]?.text||"";setAiResults(JSON.parse(tx.replace(/```json|```/g,"").trim()))}catch{setAiResults(AI_FALLBACK[aiQuery]||AI_FALLBACK["default"])}setAiLd(false)};
 
   useEffect(()=>{chatRef.current?.scrollIntoView({behavior:"smooth"})},[msgs]);
   const sendChat=async()=>{if(!chatIn.trim())return;const m=chatIn.trim();setChatIn("");setChatLd(true);setMsgs(p=>[...p,{t:"u",x:m}]);let res=null;try{const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:"You are an Islamic scholar assistant named Noor. ONLY answer about Islam, Quran, Hadith, Fiqh, Seerah, Islamic history, and Muslim practices. Cite Quran ayah numbers and Hadith (Sahih Bukhari/Muslim). If the question is not about Islam, politely say you only cover Islamic topics. Use **bold** for key terms. Be warm, accurate, and cite authentic Sunni sources. End with 📖 and the source reference.",messages:[{role:"user",content:m}]})});const d=await r.json();if(d.content?.[0]?.text)res=d.content[0].text}catch{}
@@ -364,24 +370,24 @@ export default function NoorApp() {
         position:splashPhase===1?"relative":"absolute",
         maxWidth:500,
       }}>
-        <div style={{fontFamily:"'Amiri Quran',serif",fontSize:16,color:"#C4A44880",
-          marginBottom:16,letterSpacing:2}}>
+        <div style={{fontFamily:"'Amiri Quran',serif",fontSize:20,color:"#C4A448A0",
+          marginBottom:18,letterSpacing:2}}>
           إِنَّا لِلَّهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ
         </div>
-        <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:15,color:"#B8B0A0",
+        <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:18,color:"#C8C0B0",
           lineHeight:1.9,animation:splashPhase===1?"splashIn 1.2s ease":"none"}}>
           This app is built as a <span style={{color:"#C4A448",fontWeight:600}}>sadaqah jariyah</span> in loving memory of
         </div>
-        <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(22px,5vw,32px)",
-          color:"#C4A448",fontWeight:700,margin:"14px 0",letterSpacing:1,
+        <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(28px,7vw,40px)",
+          color:"#C4A448",fontWeight:700,margin:"16px 0",letterSpacing:1,
           animation:splashPhase===1?"splashIn 1.5s ease":"none"}}>
           Sarwat Baig
         </div>
-        <div style={{fontFamily:"'Amiri Quran',serif",fontSize:14,color:"#C4A44880"}}>
+        <div style={{fontFamily:"'Amiri Quran',serif",fontSize:18,color:"#C4A448A0"}}>
           رحمه الله
         </div>
-        <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:12.5,color:"#8090A0",
-          marginTop:14,lineHeight:1.8,fontStyle:"italic"}}>
+        <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:15,color:"#9AA0A8",
+          marginTop:16,lineHeight:1.8,fontStyle:"italic"}}>
           Every ayah read, every heart healed, every word memorized through this app — may the reward reach him
         </div>
       </div>
@@ -452,21 +458,27 @@ export default function NoorApp() {
     {tab==="home"&&!surah&&<div className="fi">
 
       {/* Memorial — In Loving Memory */}
-      <div style={{textAlign:"center",padding:"18px 18px",marginBottom:16,borderRadius:14,
-        background:isDark?"linear-gradient(135deg,rgba(196,164,72,.08),rgba(10,81,57,.06))":"linear-gradient(135deg,rgba(196,164,72,.15),rgba(10,81,57,.08))",
-        border:`1px solid ${isDark?"rgba(196,164,72,.2)":"rgba(196,164,72,.35)"}`,
-        boxShadow:isDark?"0 0 30px rgba(196,164,72,.06)":"0 0 20px rgba(196,164,72,.1)"}}>
-        <div style={{fontFamily:"'Amiri Quran',serif",fontSize:18,color:T.g,marginBottom:6,lineHeight:1.5}}>
+      <div style={{textAlign:"center",padding:"24px 20px",marginBottom:18,borderRadius:16,
+        background:isDark?"linear-gradient(135deg,rgba(196,164,72,.12),rgba(10,81,57,.08))":"linear-gradient(135deg,rgba(196,164,72,.2),rgba(10,81,57,.12))",
+        border:`1.5px solid ${isDark?"rgba(196,164,72,.3)":"rgba(196,164,72,.45)"}`,
+        boxShadow:isDark?"0 0 40px rgba(196,164,72,.1)":"0 0 24px rgba(196,164,72,.15)"}}>
+        <div style={{fontFamily:"'Amiri Quran',serif",fontSize:22,color:T.g,marginBottom:8,lineHeight:1.5}}>
           إِنَّا لِلَّهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ
         </div>
-        <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:14,color:isDark?"#D4C9A8":T.tx,lineHeight:1.7}}>
-          In loving memory of <span style={{color:T.g,fontWeight:700,fontSize:15}}>Sarwat Baig</span>
+        <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:17,color:isDark?"#E8E0C8":T.tx,lineHeight:1.7}}>
+          In loving memory of
         </div>
-        <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:11.5,color:T.tx2,marginTop:5,lineHeight:1.5}}>
-          May Allah grant him the highest ranks in Jannah · <span style={{fontFamily:"'Amiri Quran',serif",color:T.g}}>رحمه الله</span>
+        <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:24,color:T.g,fontWeight:700,margin:"6px 0",letterSpacing:1}}>
+          Sarwat Baig
         </div>
-        <div style={{width:40,height:1,background:T.g,margin:"10px auto 0",opacity:.3,borderRadius:1}}/>
-        <div style={{fontSize:9,color:T.tx3,marginTop:8,fontStyle:"italic"}}>This app is a Sadaqah Jariyah — an ongoing charity for his soul</div>
+        <div style={{fontFamily:"'Amiri Quran',serif",fontSize:16,color:T.g,opacity:.8}}>رحمه الله</div>
+        <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,color:isDark?"#B8B0A0":T.tx2,marginTop:8,lineHeight:1.5}}>
+          May Allah grant him the highest ranks in Jannah
+        </div>
+        <div style={{width:50,height:1.5,background:T.g,margin:"12px auto 0",opacity:.35,borderRadius:1}}/>
+        <div style={{fontSize:11,color:isDark?"#A09880":T.tx3,marginTop:10,fontStyle:"italic",lineHeight:1.5}}>
+          This app is a Sadaqah Jariyah — an ongoing charity for his soul
+        </div>
       </div>
 
       {/* ── TIME-OF-DAY AMBIENT SCENE ── */}
@@ -594,7 +606,7 @@ export default function NoorApp() {
           <button onClick={()=>setHifzMode(!hifzMode)} style={{...btn(hifzMode),borderColor:hifzMode?"#FF9800":T.bd}}>{IC.brain} Hifz</button>
         </div>}
       </div>}
-      {readMode!=="mushaf"&&surah.n!==9&&surah.n!==1&&<div style={{textAlign:"center",fontFamily:"'Amiri Quran',serif",fontSize:26,color:T.g,padding:"14px 0",marginBottom:12}}>بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ</div>}
+      {/* Bismillah is included in verse data from API — no separate display needed */}
       {ld?<div style={{textAlign:"center",padding:60,color:T.tx3}}><div style={{width:30,height:30,border:`3px solid ${T.bd}`,borderTopColor:T.g,borderRadius:"50%",animation:"spin .8s linear infinite",margin:"0 auto 12px"}}/>Loading {surah.e}...</div>:
       fetchErr?<div style={{textAlign:"center",padding:50,color:T.tx3}}>
         <div style={{fontSize:18,marginBottom:8}}>📡</div>
@@ -640,10 +652,28 @@ export default function NoorApp() {
           <div style={{background:isDark?"#080D14":"#F5F0E2",borderRadius:10,overflow:"hidden",border:`1px solid ${bd}`}}>
             <style>{fontStyles}</style>
             
-            {/* Page Header */}
+            {/* Page Header with audio play */}
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 16px",borderBottom:`1px solid ${bd}`,background:hd}}>
               <span style={{fontSize:10,color:mt,fontFamily:"'Manrope'",fontWeight:600}}>Juz {jz}</span>
-              <span style={{fontFamily:"'UthmanicHafs','Amiri Quran',serif",fontSize:14,color:mk}}>{pageSurah}</span>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <span style={{fontFamily:"'UthmanicHafs','Amiri Quran',serif",fontSize:14,color:mk}}>{pageSurah}</span>
+                <button onClick={()=>{
+                  if(!audio)return;
+                  if(playing==="mushaf-full"){audio.pause();setPlaying(null);return}
+                  audio.src=`https://everyayah.com/data/${AUDIO_RECITERS[rec.id]||"Alafasy_128kbps"}/${String(surah.n).padStart(3,"0")}001.mp3`;
+                  audio.load();audio.play().catch(()=>{});setPlaying("mushaf-full");
+                  audio.onended=()=>{/* auto-play next ayah */
+                    const cur=parseInt(audio.src.match(/\d{3}(\d{3})\.mp3/)?.[1]||"0");
+                    if(cur<surah.v){const next=String(surah.n).padStart(3,"0")+String(cur+1).padStart(3,"0")+".mp3";
+                    audio.src=`https://everyayah.com/data/${AUDIO_RECITERS[rec.id]||"Alafasy_128kbps"}/${next}`;audio.load();audio.play().catch(()=>{})}
+                    else{setPlaying(null)}
+                  };
+                }} style={{width:24,height:24,borderRadius:"50%",border:"none",
+                  background:playing==="mushaf-full"?`linear-gradient(135deg,#e74c3c,#c0392b)`:`linear-gradient(135deg,${DARK.em},${DARK.el})`,
+                  color:"white",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",flexShrink:0}}>
+                  {playing==="mushaf-full"?IC.pause:IC.play}
+                </button>
+              </div>
               <span style={{fontSize:10,color:mt,fontFamily:"'Manrope'",fontWeight:600}}>{pg}</span>
             </div>
 
@@ -669,10 +699,11 @@ export default function NoorApp() {
                       <span key={wi} style={{
                         fontFamily:`'qpc-p${word.page}','UthmanicHafs','Amiri Quran',serif`,
                         color:word.type==="end"?endColor:tx,
-                        fontSize:word.type==="end"?"0.65em":"inherit",
+                        fontSize:word.type==="end"?"0.6em":"inherit",
                         verticalAlign:word.type==="end"?"middle":"baseline",
-                        display:"inline-block",
-                      }} dangerouslySetInnerHTML={{__html:word.code}}/>
+                        display:"inline",
+                        padding:word.type==="end"?"0 2px":"0",
+                      }}>{word.code||""}</span>
                     ))}
                   </div>
                 ))}
@@ -879,10 +910,20 @@ export default function NoorApp() {
 
 function TafPanel({sn,vn,T}){
   const[tx,setTx]=useState("");const[ld,setLd]=useState(true);
-  useEffect(()=>{setLd(true);setTx("");(async()=>{try{const r=await fetch(`${API}/ayah/${sn}:${vn}/en.ibn-kathir`);const d=await r.json();setTx(d.code===200&&d.data?.text?d.data.text:"Loading...")}catch{setTx("Unable to load.")}setLd(false)})()},[sn,vn]);
+  const[tafLang,setTafLang]=useState("en");
+  const TAF_EDITIONS={"en":"en.ibn-kathir","ar":"ar.ibn-kathir","ur":"ur.ibn-kathir"};
+  const TAF_LABELS={"en":"English","ar":"العربية","ur":"اردو"};
+  useEffect(()=>{setLd(true);setTx("");(async()=>{try{const ed=TAF_EDITIONS[tafLang]||"en.ibn-kathir";const r=await fetch(`https://api.alquran.cloud/v1/ayah/${sn}:${vn}/${ed}`);const d=await r.json();setTx(d.code===200&&d.data?.text?d.data.text:"Tafsir not available for this language.")}catch{setTx("Unable to load tafsir. Please check your connection.")}setLd(false)})()},[sn,vn,tafLang]);
   return(<div style={{marginTop:10,padding:12,background:`${T.g}06`,border:`1px solid ${T.g}12`,borderRadius:8}}>
-    <div style={{fontSize:9.5,fontWeight:600,color:T.g,textTransform:"uppercase",letterSpacing:1,marginBottom:5}}>📖 Tafsir Ibn Kathir</div>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+      <div style={{fontSize:9.5,fontWeight:600,color:T.g,textTransform:"uppercase",letterSpacing:1}}>📖 Tafsir Ibn Kathir</div>
+      <div style={{display:"flex",gap:3}}>
+        {Object.entries(TAF_LABELS).map(([k,v])=>(
+          <button key={k} onClick={()=>setTafLang(k)} style={{padding:"2px 8px",borderRadius:4,border:`1px solid ${tafLang===k?T.g:T.bd}`,background:tafLang===k?`${T.g}18`:"transparent",color:tafLang===k?T.g:T.tx3,fontSize:9,fontFamily:"'Manrope'",cursor:"pointer",fontWeight:600}}>{v}</button>
+        ))}
+      </div>
+    </div>
     {ld?<div style={{display:"flex",gap:3}}>{[0,1,2].map(i=><div key={i} style={{width:4,height:4,background:T.g,borderRadius:"50%",animation:`pulse 1s infinite ${i*.2}s`}}/>)}</div>
-    :<div style={{fontFamily:"'Cormorant Garamond'",fontSize:12.5,lineHeight:1.9,color:T.tx2}}>{tx}</div>}
+    :<div style={{fontFamily:tafLang==="ar"||tafLang==="ur"?"'Amiri Quran','Noto Naskh Arabic',serif":"'Cormorant Garamond',serif",fontSize:tafLang==="ar"||tafLang==="ur"?14:12.5,lineHeight:1.9,color:T.tx2,direction:tafLang==="ar"||tafLang==="ur"?"rtl":"ltr"}}>{tx}</div>}
   </div>);
 }
