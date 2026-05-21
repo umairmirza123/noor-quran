@@ -717,7 +717,7 @@ export default function NoorApp() {
                         display:"inline",
                         padding:word.type==="end"?"0 1px":"0",
                         position:word.type==="end"?"relative":"static",
-                        top:word.type==="end"?"0.15em":"0",
+                        top:word.type==="end"?"0.3em":"0",
                       }}>{word.code||""}</span>
                     ))}
                   </div>
