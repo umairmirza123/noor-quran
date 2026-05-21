@@ -44,18 +44,31 @@ export default async function handler(req, res) {
     
     const token = await getToken();
     
-    const apiRes = await fetch(
-      `${QF_API}/verses/by_page/${page}?words=true&word_fields=code_v2,v2_page,line_number,char_type_name&per_page=50`,
-      {
-        headers: {
-          "x-auth-token": token,
-          "x-client-id": QF_ID,
-        },
+    // Try mushaf=1 (KFGQPC Hafs) first, then mushaf=2 if it fails
+    let data = null;
+    for (const mushafId of [1, 2]) {
+      const apiRes = await fetch(
+        `${QF_API}/verses/by_page/${page}?words=true&word_fields=code_v2,v2_page,line_number,char_type_name&per_page=50&mushaf=${mushafId}`,
+        {
+          headers: {
+            "x-auth-token": token,
+            "x-client-id": QF_ID,
+          },
+        }
+      );
+      
+      const d = await apiRes.json();
+      if (d.verses && d.verses.length > 0) {
+        data = d;
+        break;
       }
-    );
+    }
     
-    const data = await apiRes.json();
-    res.status(200).json(data);
+    if (data) {
+      res.status(200).json(data);
+    } else {
+      res.status(404).json({ error: "No data for this page in pre-production API", page });
+    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
