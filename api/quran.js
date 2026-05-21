@@ -1,10 +1,10 @@
 // Vercel Serverless Proxy for Quran Foundation API
 // Bypasses CORS by making server-to-server calls
 
-const QF_ID = "9c9dd24f-9873-4211-a6b5-502ac85754bf";
-const QF_SECRET = "d6uetkamUhnfIhHoFedfaVGcFG";
-const QF_AUTH = "https://prelive-oauth2.quran.foundation";
-const QF_API = "https://apis-prelive.quran.foundation/content/api/v4";
+const QF_ID = "c161e402-186c-4bfa-bcfe-69648b0f23eb";
+const QF_SECRET = "F07DqaNB6KvqqFUCiI4lFbFSC-";
+const QF_AUTH = "https://oauth2.quran.foundation";
+const QF_API = "https://api.quran.com/api/v4";
 
 let cachedToken = null;
 let tokenExpiry = 0;
