@@ -752,7 +752,7 @@ export default function NoorApp() {
                     </div>
                   ))}
                   <div style={{fontSize:10,color:mt,marginTop:14,paddingTop:10,borderTop:`1px solid ${bd}`}}>
-                    Preview mode · Deploy to see authentic QPC Mushaf rendering
+                    Page {pg}
                   </div>
                 </div>
               </div>}
