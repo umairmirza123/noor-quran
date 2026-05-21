@@ -2,7 +2,7 @@
 // Bypasses CORS by making server-to-server calls
 
 const QF_ID = "c161e402-186c-4bfa-bcfe-69648b0f23eb";
-const QF_SECRET = "F07DqaNB6KvqqFUCiI4lFbFSC-";
+const QF_SECRET = "F07DqaNB6KyqqFUCiI4lFbFSC-";
 const QF_AUTH = "https://oauth2.quran.foundation";
 const QF_API = "https://api.quran.com/api/v4";
 
@@ -21,13 +21,16 @@ async function getToken() {
     body: "grant_type=client_credentials&scope=content",
   });
   
-  const data = await res.json();
+  const text = await res.text();
+  let data;
+  try { data = JSON.parse(text); } catch { throw new Error(`Token response not JSON: ${res.status} ${text.substring(0, 200)}`); }
+  
   if (data.access_token) {
     cachedToken = data.access_token;
     tokenExpiry = Date.now() + (data.expires_in || 3600) * 1000 - 60000;
     return cachedToken;
   }
-  throw new Error("Token request failed");
+  throw new Error(`Token failed: ${res.status} ${text.substring(0, 300)}`);
 }
 
 export default async function handler(req, res) {
