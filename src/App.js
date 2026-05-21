@@ -712,10 +712,12 @@ export default function NoorApp() {
                       <span key={wi} style={{
                         fontFamily:`'qpc-p${word.page}','UthmanicHafs','Amiri Quran',serif`,
                         color:word.type==="end"?endColor:tx,
-                        fontSize:word.type==="end"?"0.6em":"inherit",
-                        verticalAlign:word.type==="end"?"middle":"baseline",
+                        fontSize:word.type==="end"?"0.68em":"inherit",
+                        verticalAlign:"baseline",
                         display:"inline",
-                        padding:word.type==="end"?"0 2px":"0",
+                        padding:word.type==="end"?"0 1px":"0",
+                        position:word.type==="end"?"relative":"static",
+                        top:word.type==="end"?"0.15em":"0",
                       }}>{word.code||""}</span>
                     ))}
                   </div>
@@ -758,21 +760,21 @@ export default function NoorApp() {
               </div>}
             </div>
 
-            {/* Page Navigation */}
+            {/* Page Navigation — RTL: right side = next page (forward), left side = prev page (back) */}
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 16px",borderTop:`1px solid ${bd}`,background:hd}}>
-              <button onClick={goNext} disabled={pg>=604}
+              <button onClick={goPrev} disabled={pg<=1}
                 style={{display:"flex",alignItems:"center",gap:4,background:"none",border:"none",
-                  color:pg<604?mk:mt,fontSize:11,fontFamily:"'Manrope'",cursor:"pointer",fontWeight:600,opacity:pg<604?1:.3,padding:"4px 8px"}}>
-                {IC.right} Previous
+                  color:pg>1?mk:mt,fontSize:11,fontFamily:"'Manrope'",cursor:"pointer",fontWeight:600,opacity:pg>1?1:.3,padding:"4px 8px"}}>
+                {IC.left} Previous
               </button>
               <div style={{textAlign:"center"}}>
                 <span style={{fontSize:11,color:mk,fontWeight:700,fontFamily:"'Manrope'"}}>{pg}</span>
                 <span style={{fontSize:9,color:mt,fontFamily:"'Manrope'"}}> / 604</span>
               </div>
-              <button onClick={goPrev} disabled={pg<=1}
+              <button onClick={goNext} disabled={pg>=604}
                 style={{display:"flex",alignItems:"center",gap:4,background:"none",border:"none",
-                  color:pg>1?mk:mt,fontSize:11,fontFamily:"'Manrope'",cursor:"pointer",fontWeight:600,opacity:pg>1?1:.3,padding:"4px 8px"}}>
-                Next {IC.left}
+                  color:pg<604?mk:mt,fontSize:11,fontFamily:"'Manrope'",cursor:"pointer",fontWeight:600,opacity:pg<604?1:.3,padding:"4px 8px"}}>
+                Next {IC.right}
               </button>
             </div>
           </div>
