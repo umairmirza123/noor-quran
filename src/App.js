@@ -699,14 +699,14 @@ export default function NoorApp() {
               </div>}
 
               {/* QPC V2 RENDERED — live from Quran Foundation API */}
-              {!mushafLd&&mushafLines&&<div style={{padding:"20px 14px 24px",direction:"rtl"}}>
+              {!mushafLd&&mushafLines&&<div style={{padding:"16px 8px 20px",direction:"rtl",overflow:"hidden"}}>
                 {mushafLines.map((line,li) => (
                   <div key={li} style={{
-                    display:"flex",justifyContent:"center",flexWrap:"nowrap",gap:0,
+                    display:"flex",justifyContent:"center",flexWrap:"wrap",gap:0,
                     direction:"rtl",
-                    minHeight:"2.2em",
-                    lineHeight:2.2,
-                    fontSize:"clamp(22px,6.5vw,36px)",
+                    minHeight:"2em",
+                    lineHeight:2.0,
+                    fontSize:"clamp(18px,5vw,32px)",
                   }}>
                     {line.map((word,wi) => (
                       <span key={wi} style={{
